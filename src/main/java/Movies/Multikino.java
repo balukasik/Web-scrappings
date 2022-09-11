@@ -30,6 +30,7 @@ public class Multikino extends Scrapper {
     public static ArrayList<String> setLocations() {
         ArrayList<String> links = new ArrayList<>();
         driver.get(URL + "nasze-kina");
+        delay(3);
         for (int i = 0; i < driver.findElements(new By.ByClassName("ml-columns__item")).size(); i++) {
             links.add(driver.findElements(new By.ByClassName("ml-columns__item")).get(i).getText());
         }
@@ -61,6 +62,7 @@ public class Multikino extends Scrapper {
     public static ArrayList<String> getLocations() {
         return locations;
     }
+
     public static void delay(int seconds){
         try {
             TimeUnit.SECONDS.sleep(seconds + 5);

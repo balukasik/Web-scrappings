@@ -3,9 +3,9 @@ package Movies;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import java.text.SimpleDateFormat;
+import javax.annotation.PostConstruct;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -13,7 +13,7 @@ public class Multikino extends Scrapper {
 
     private static Multikino instance;
 
-    private static ArrayList<String> locations;
+    private static ArrayList<Location> locations;
 
     private Multikino() {
         super("https://multikino.pl/");
@@ -27,22 +27,31 @@ public class Multikino extends Scrapper {
         return instance;
     }
 
-    public static ArrayList<String> setLocations() {
-        ArrayList<String> links = new ArrayList<>();
+    public static ArrayList<Location> setLocations() {
+        ArrayList<Location> links = new ArrayList<>();
         driver.get(URL + "nasze-kina");
-        delay(3);
-        for (int i = 0; i < driver.findElements(new By.ByClassName("ml-columns__item")).size(); i++) {
-            links.add(driver.findElements(new By.ByClassName("ml-columns__item")).get(i).getText());
+        delay(DELAY);
+        List<WebElement> table = driver.findElements(new By.ByClassName("ml-columns__item"));
+        for (int i = 0; i < table.size(); i++) {
+
+            links.add(new Location(table.get(i).getText(), table.get(i).findElement(By.tagName("a")).getAttribute("href")));
+        }
+        for(Location location : links){
+            driver.get(location.getUrl());
+            delay(DELAY);
+            WebElement cinemaInfo = driver.findElement(new By.ByClassName("collapse--cinema-details")).findElement(new By.ByClassName("container-scroll"));
+            String address = cinemaInfo.getText();
+
         }
         return links;
     }
 
-    public static List<Movie> getTimeTable(String location, Date date) {
+    public static List<Movie> getTimeTable(Location location, LocalDate date) {
 
 
         List<Movie> movies = new ArrayList<Movie>();
-        driver.get(URL + "repertuar/" + location + "/teraz-gramy/alfabetyczny?data=" + new SimpleDateFormat("dd-MM-yyyy").format(date));
-        delay(3);
+        driver.get(location.getUrl() + "/teraz-gramy/alfabetyczny?data=" + date.toString());
+        delay(DELAY);
         List<WebElement> table = driver.findElements(new By.ByClassName("filmlist__item"));
         for(WebElement elem: table){
             String title = elem.findElement(By.cssSelector(".filmlist__title.subtitle.h3")).getText();
@@ -52,14 +61,14 @@ public class Multikino extends Scrapper {
 
             List<String> times = new ArrayList<>();
             elem.findElements(By.className("times__detail")).forEach(time -> times.add(time.getText()));
-            movies.add(new Movie(title, date ,times.toArray()));
+            movies.add(new Movie(title, date, times.toArray(new String[0]), location, Cinema.MULTIKINO));
         }
         return movies;
 
     }
 
 
-    public static ArrayList<String> getLocations() {
+    public static ArrayList<Location> getLocations() {
         return locations;
     }
 

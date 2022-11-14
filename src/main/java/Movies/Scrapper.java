@@ -1,7 +1,7 @@
 package Movies;
 
+
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
 
 import java.util.concurrent.TimeUnit;
 
@@ -9,13 +9,11 @@ public abstract class Scrapper {
 
     public static String URL;
     public static ChromeDriver driver;
-
+    public static final int DELAY = 3;
 
     public Scrapper(String url){
         this.URL = url;
-        ChromeOptions op = new ChromeOptions();
-        op.addArguments("--headless");
-        driver = new ChromeDriver(op);
+        driver = ChromeDriverService.getDriver();
     }
 
     public static void delay(int seconds){

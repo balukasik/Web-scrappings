@@ -9,7 +9,7 @@ public abstract class Scrapper {
 
     public static String URL;
     public static ChromeDriver driver;
-    public static final int DELAY = 3;
+    public static final int DELAY = 5;
 
     public Scrapper(String url){
         this.URL = url;

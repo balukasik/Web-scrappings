@@ -5,17 +5,27 @@ public class Location {
     private final String url;
     private String address;
     private String city;
+    private Cinema cinema;
 
-    public Location(String name, String url, String address, String city){
+
+
+    public Location(String name, String url, String address, String city, Cinema cinema){
         this.name = name;
         this.url = url;
         this.address = address;
         this.city = city;
+        this.cinema = cinema;
+
     }
 
-    public Location(String name, String url) {
+    public Location(String name, String url, Cinema cinema) {
         this.name = name;
         this.url = url;
+        this.cinema = cinema;
+    }
+
+    public Cinema getCinema() {
+        return cinema;
     }
 
     public void setAddressData(String address, String city){

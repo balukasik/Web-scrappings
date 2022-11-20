@@ -1,11 +1,16 @@
 package Movies;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import javax.annotation.PostConstruct;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -34,14 +39,28 @@ public class Multikino extends Scrapper {
         List<WebElement> table = driver.findElements(new By.ByClassName("ml-columns__item"));
         for (int i = 0; i < table.size(); i++) {
 
-            links.add(new Location(table.get(i).getText(), table.get(i).findElement(By.tagName("a")).getAttribute("href")));
+            links.add(new Location(table.get(i).getText(), table.get(i).findElement(By.tagName("a")).getAttribute("href"), Cinema.MULTIKINO));
         }
         for(Location location : links){
-            driver.get(location.getUrl());
-            delay(DELAY);
-            WebElement cinemaInfo = driver.findElement(new By.ByClassName("collapse--cinema-details")).findElement(new By.ByClassName("container-scroll"));
-            String address = cinemaInfo.getText();
 
+            driver.get(location.getUrl());
+            WebElement button = new WebDriverWait(driver, Duration.ofSeconds(DELAY)).until(ExpectedConditions.elementToBeClickable( new By.ByCssSelector("a[href *= 'dojazd-i-parking']")));
+            driver.executeScript("arguments[0].click();", button);
+            WebElement cinemaDetails = new WebDriverWait(driver, Duration.ofSeconds(DELAY)).until(ExpectedConditions.presenceOfElementLocated(new By.ByClassName("collapse--cinema-details")));
+            cinemaDetails = new WebDriverWait(driver,Duration.ofSeconds(DELAY)).until(ExpectedConditions.presenceOfNestedElementLocatedBy(cinemaDetails, new By.ByClassName("active")));
+            cinemaDetails = new WebDriverWait(driver,Duration.ofSeconds(DELAY)).until(ExpectedConditions.presenceOfNestedElementLocatedBy(cinemaDetails, new By.ByClassName("container--scroll")));
+            driver.executeScript("var elems = arguments[0].getElementsByClassName(\"collapse--accordion\"); Array.from(elems).forEach(element => element.parentNode.removeChild(element));", cinemaDetails);
+
+            String[] cinemaInfo = new WebDriverWait(driver,Duration.ofSeconds(DELAY)).until(ExpectedConditions.presenceOfNestedElementLocatedBy(cinemaDetails, new By.ByCssSelector("div"))).getAttribute("innerHTML").split("<.+>");
+            if(cinemaInfo.length < 4){
+                cinemaInfo = new WebDriverWait(driver,Duration.ofSeconds(DELAY)).until(ExpectedConditions.presenceOfNestedElementLocatedBy(cinemaDetails, new By.ByClassName("iconified"))).getAttribute("innerHTML").split("<.+>");
+            }
+            try{
+                location.setAddressData(cinemaInfo[1].trim(), cinemaInfo[3].trim());
+            } catch (Exception e){
+                System.out.println(location.getName() + "FAILED TO LOAD");
+            }
+            System.out.println(location.getName() + " LOADED");
         }
         return links;
     }

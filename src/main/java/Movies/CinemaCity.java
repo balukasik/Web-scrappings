@@ -33,7 +33,7 @@ public class CinemaCity extends Scrapper {
         for(Object o: result){
             Map<String,String> map = (Map<String, String>) o;
             Map<String,String> addressMap = ((Map<String, Map<String,String>>) o).get("address");
-            links.add(new Location(map.get("name"), map.get("uri") + "/" + map.get("externalCode"), addressMap.get("address1"), addressMap.get("city")));
+            links.add(new Location(map.get("name"), map.get("uri") + "/" + map.get("externalCode"), addressMap.get("address1"), addressMap.get("city"), Cinema.CINEMACITY));
         }
         return links;
     }
